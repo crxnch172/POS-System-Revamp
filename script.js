@@ -41,10 +41,7 @@ function adminLogin() {
     if (status) {
       status.textContent = "Logged in successfully";
       status.style.color = "green";
-
-      setTimeout(() => {
-        status.textContent = "";
-      }, 2500);
+      setTimeout(() => status.textContent = "", 2500);
     }
 
     renderAdminUI();
@@ -72,27 +69,23 @@ function renderAdminUI() {
   if (isAdmin) {
     btn.textContent = `Welcome, ${adminName}!`;
     btn.disabled = true;
-
     btn.style.pointerEvents = "none";
-    btn.style.opacity = "0.8";
-    btn.style.cursor = "default";
     btn.style.background = "#2e7d32";
+    btn.style.opacity = "0.8";
 
     if (status) status.textContent = "";
   } else {
     btn.textContent = "Admin Login";
     btn.disabled = false;
     btn.onclick = adminLogin;
-
     btn.style.pointerEvents = "auto";
-    btn.style.opacity = "1";
-    btn.style.cursor = "pointer";
     btn.style.background = "#d32f2f";
+    btn.style.opacity = "1";
   }
 }
 
 /* =========================
-   TOTAL CALCULATION
+   TOTAL
 ========================= */
 
 function calculateTotal() {
@@ -101,15 +94,13 @@ function calculateTotal() {
 
 function updateTotalUI() {
   const totalBox = document.getElementById("total");
-  if (totalBox) {
-    totalBox.textContent = calculateTotal();
-  }
+  if (totalBox) totalBox.textContent = calculateTotal();
 
   updateChange();
 }
 
 /* =========================
-   CHANGE CALCULATION
+   CHANGE (AUTO)
 ========================= */
 
 function updateChange() {
@@ -126,7 +117,7 @@ function updateChange() {
   changeEl.textContent = change > 0 ? change : 0;
 }
 
-document.addEventListener("input", function (e) {
+document.addEventListener("input", (e) => {
   if (e.target && e.target.id === "cash") {
     updateChange();
   }
@@ -143,10 +134,7 @@ function addToCart(name, price) {
     if (status) {
       status.textContent = "⚠ Please login first before adding items.";
       status.style.color = "red";
-
-      setTimeout(() => {
-        status.textContent = "";
-      }, 2000);
+      setTimeout(() => status.textContent = "", 2000);
     }
     return;
   }
@@ -188,18 +176,14 @@ function checkout(method) {
   const address = prompt("Address:");
   if (!name || !address) return;
 
-  const cashInput = document.getElementById("cash");
-  const cash = Number(cashInput?.value) || 0;
-
+  const cash = Number(document.getElementById("cash")?.value) || 0;
   const total = calculateTotal();
 
-  // BLOCK IF NO CASH
   if (!cash || cash <= 0) {
-    alert("Please enter cash before selecting payment.");
+    alert("Please enter cash first.");
     return;
   }
 
-  // BLOCK IF INSUFFICIENT CASH
   if (cash < total) {
     alert("Insufficient cash.");
     return;
@@ -246,13 +230,12 @@ function checkout(method) {
   localStorage.setItem("orderLogsByDate", JSON.stringify(orderLogsByDate));
 
   cart = [];
-
   updateCart();
   renderLogs();
 }
 
 /* =========================
-   RECEIPT
+   RECEIPT (MOBILE FIXED DOWNLOAD)
 ========================= */
 
 function openReceipt(name, address, method, cash, change, items, summary, totalAmount, orderDate, orderTime) {
@@ -297,14 +280,30 @@ function openReceipt(name, address, method, cash, change, items, summary, totalA
 
   ctx.fillText("Thank you!", 120, y);
 
-  const link = document.createElement("a");
-  link.download = `receipt_${Date.now()}.png`;
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+  // ✅ MOBILE SAFE DOWNLOAD
+  canvas.toBlob(function (blob) {
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `receipt_${Date.now()}.png`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    // fallback for mobile browsers
+    setTimeout(() => {
+      window.open(url, "_blank");
+    }, 300);
+
+  }, "image/png");
 }
 
 /* =========================
-   GROUP ITEMS
+   GROUP ITEMS (BULLETED)
 ========================= */
 
 function groupItems(items) {
@@ -361,7 +360,7 @@ function renderLogs() {
 }
 
 /* =========================
-   DELETE ORDER
+   DELETE
 ========================= */
 
 function deleteOrder(id) {
