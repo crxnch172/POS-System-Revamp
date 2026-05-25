@@ -283,39 +283,45 @@ function openReceipt(
 
   ctx.fillText("Thank you!", 120, y);
 
-  // ✅ Samsung-safe Blob export
-  canvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob);
+  // ✅ ALWAYS SAFE METHOD FOR SAMSUNG
+  const imageURL = canvas.toDataURL("image/png");
 
-    // Try download first
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `receipt_${Date.now()}.png`;
-    document.body.appendChild(a);
-
-    const clickEvent = new MouseEvent("click", {
-      view: window,
-      bubbles: true,
-      cancelable: true
-    });
-
-    const success = a.dispatchEvent(clickEvent);
-    document.body.removeChild(a);
-
-    // 🔥 Samsung / Android fallback
-    if (!success || /SamsungBrowser/i.test(navigator.userAgent)) {
-      setTimeout(() => {
-        const newTab = window.open(url, "_blank");
-        if (!newTab) {
-          alert("Tap and hold the image to save your receipt.");
+  // open in new tab (Samsung-friendly)
+  const newTab = window.open();
+  if (newTab) {
+    newTab.document.write(`
+      <title>Receipt</title>
+      <style>
+        body {
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: #000;
+          color: white;
+          font-family: Arial;
         }
-      }, 300);
-    }
-
-    // cleanup
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
-
-  }, "image/png");
+        img {
+          width: 100%;
+          max-width: 400px;
+        }
+        .hint {
+          padding: 10px;
+          font-size: 14px;
+          text-align: center;
+        }
+      </style>
+      <div class="hint">
+        Long press the image → Save to device
+      </div>
+      <img src="${imageURL}" />
+    `);
+    newTab.document.close();
+  } else {
+    // fallback if popup blocked
+    alert("Popup blocked. Please allow popups to view receipt.");
+  }
 }
 /* =========================
    GROUP ITEMS (BULLETED)
