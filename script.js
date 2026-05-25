@@ -238,7 +238,10 @@ function checkout(method) {
    RECEIPT (MOBILE FIXED DOWNLOAD)
 ========================= */
 
-function openReceipt(name, address, method, cash, change, items, summary, totalAmount, orderDate, orderTime) {
+function openReceipt(
+  name, address, method, cash, change,
+  items, summary, totalAmount, orderDate, orderTime
+) {
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -280,26 +283,32 @@ function openReceipt(name, address, method, cash, change, items, summary, totalA
 
   ctx.fillText("Thank you!", 120, y);
 
-  // ✅ MOBILE SAFE DOWNLOAD
-  canvas.toBlob(function (blob) {
-    const url = URL.createObjectURL(blob);
+  // 🔥 MOBILE SAFE EXPORT
+  const imageURL = canvas.toDataURL("image/png");
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `receipt_${Date.now()}.png`;
+  const a = document.createElement("a");
+  a.href = imageURL;
+  a.download = `receipt_${Date.now()}.png`;
 
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  document.body.appendChild(a);
 
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const clickEvent = new MouseEvent("click", {
+    view: window,
+    bubbles: true,
+    cancelable: true
+  });
 
-    // fallback for mobile browsers
+  const success = a.dispatchEvent(clickEvent);
+
+  document.body.removeChild(a);
+
+  // fallback for mobile browsers that block downloads
+  if (!success) {
     setTimeout(() => {
-      window.open(url, "_blank");
+      const newTab = window.open();
+      newTab.document.write(`<img src="${imageURL}" style="width:100%">`);
     }, 300);
-
-  }, "image/png");
+  }
 }
 
 /* =========================
@@ -327,8 +336,6 @@ function renderLogs() {
   const dateEl = document.getElementById("log-date");
   const totalEl = document.getElementById("daily-total");
 
-  if (!logDiv || !dateEl) return;
-
   const logs = orderLogsByDate[currentDate] || [];
 
   dateEl.textContent = currentDate;
@@ -344,10 +351,9 @@ function renderLogs() {
 
     div.innerHTML = `
       <b>${l.name}</b><br>
+       ${currentDate} • ${l.time}<br>
       ₱${l.total} | ${l.method}<br>
-      ${l.time}<br>
       <div>${l.summary}</div>
-
       <button onclick="deleteOrder(${l.id})">Delete</button>
     `;
 
