@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POS System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- PRODUCTS -->
+  <div class="products-section">
+    <h1>POS System</h1>
+
+    <div class="products-grid">
+
+      <div class="product-card">
+        <h3>La Paz Batchoy</h3>
+        <p>₱70</p>
+        <button onclick="addToCart('La Paz Batchoy',70)">Add</button>
+      </div>
+
+      <div class="product-card">
+        <h3>Extra Egg</h3>
+        <p>₱12</p>
+        <button onclick="addToCart('Extra Egg',12)">Add</button>
+      </div>
+
+      <div class="product-card">
+        <h3>Extra Noodles</h3>
+        <p>₱10</p>
+        <button onclick="addToCart('Extra Noodles',10)">Add</button>
+      </div>
+
+      <div class="product-card">
+        <h3>Lumpiang Gulay</h3>
+        <p>₱10</p>
+        <button onclick="addToCart('Lumpiang Gulay',10)">Add</button>
+      </div>
+
+      <div class="product-card">
+        <h3>Lumpiang Gulay</h3>
+        <p>₱10</p>
+        <button onclick="addToCart('Lumpiang Gulay',10)">Add</button>
+      </div>
+
+      <div class="product-card">
+        <h3>Lumpiang Gulay</h3>
+        <p>₱10</p>
+        <button onclick="addToCart('Lumpiang Gulay',10)">Add</button>
+      </div>
+
+      
+
+    </div>
+  </div>
+
+  <!-- CART -->
+  <div class="cart-section">
+
+    <h2>Cart</h2>
+
+    <!-- ADMIN + CLOCK + SALES -->
+    <button id="admin-btn" onclick="adminLogin()">Admin Login</button>
+    <p id="login-status" style="margin-top:5px; color:red; font-size:14px;"></p>
+    <h3 id="clock"></h3>
+
+    <h3 id="daily-total">Daily Sales: ₱0</h3>
+
+    <!-- CART ITEMS -->
+    <div id="cart-items"></div>
+
+    <h3>Total: ₱<span id="total">0</span></h3>
+
+    <input type="number" id="cash" placeholder="Cash (if paying cash)" />
+
+    <button class="cash-btn" onclick="checkout('cash')">Pay Cash</button>
+    <button class="online-btn" onclick="checkout('online')">Pay Online</button>
+
+    <h3>Change: ₱<span id="change">0</span></h3>
+
+    <hr style="margin:15px 0;">
+
+    <!-- ORDER LOGS -->
+    <h2>Order Logs</h2>
+
+    <div id="order-log" class="order-log"></div>
+
+    <!-- DATE NAVIGATION (BOTTOM) -->
+    <div class="date-nav">
+      <button onclick="changeDate(-1)">⬅</button>
+      <h3 id="log-date"></h3>
+      <button onclick="changeDate(1)">➡</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
