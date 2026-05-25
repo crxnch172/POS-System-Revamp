@@ -283,34 +283,40 @@ function openReceipt(
 
   ctx.fillText("Thank you!", 120, y);
 
-  // 🔥 MOBILE SAFE EXPORT
-  const imageURL = canvas.toDataURL("image/png");
+  // ✅ Samsung-safe Blob export
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
-  a.href = imageURL;
-  a.download = `receipt_${Date.now()}.png`;
+    // Try download first
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `receipt_${Date.now()}.png`;
+    document.body.appendChild(a);
 
-  document.body.appendChild(a);
+    const clickEvent = new MouseEvent("click", {
+      view: window,
+      bubbles: true,
+      cancelable: true
+    });
 
-  const clickEvent = new MouseEvent("click", {
-    view: window,
-    bubbles: true,
-    cancelable: true
-  });
+    const success = a.dispatchEvent(clickEvent);
+    document.body.removeChild(a);
 
-  const success = a.dispatchEvent(clickEvent);
+    // 🔥 Samsung / Android fallback
+    if (!success || /SamsungBrowser/i.test(navigator.userAgent)) {
+      setTimeout(() => {
+        const newTab = window.open(url, "_blank");
+        if (!newTab) {
+          alert("Tap and hold the image to save your receipt.");
+        }
+      }, 300);
+    }
 
-  document.body.removeChild(a);
+    // cleanup
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
 
-  // fallback for mobile browsers that block downloads
-  if (!success) {
-    setTimeout(() => {
-      const newTab = window.open();
-      newTab.document.write(`<img src="${imageURL}" style="width:100%">`);
-    }, 300);
-  }
+  }, "image/png");
 }
-
 /* =========================
    GROUP ITEMS (BULLETED)
 ========================= */
@@ -351,7 +357,7 @@ function renderLogs() {
 
     div.innerHTML = `
       <b>${l.name}</b><br>
-       ${currentDate} • ${l.time}<br>
+      ${l.time}<br>
       ₱${l.total} | ${l.method}<br>
       <div>${l.summary}</div>
       <button onclick="deleteOrder(${l.id})">Delete</button>
@@ -364,7 +370,6 @@ function renderLogs() {
     totalEl.textContent = "Daily Sales: ₱" + dailyTotal;
   }
 }
-
 /* =========================
    DELETE
 ========================= */
